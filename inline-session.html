@@ -118,7 +118,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     function initXR() {
 
       console.log("wir sind in initXR");
-      
+
       xrButton = new WebXRButton({
         onRequestSession: onRequestVRSession,  // >>> Changed to onRequestVRSession
         onEndSession: onEndSession
@@ -226,15 +226,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           if (arStarted) {  // >>> Check if session is AR
             skybox.visible = false;  // >>> Hide skybox in AR mode
           }
-
-          // >>> Add event listener for reset
-          xrImmersiveRefSpace.addEventListener('reset', (evt) => {
-            if (evt.transform) {
-              // AR experiences typically should stay grounded to the real world.
-              // If there's a known origin shift, compensate for it here.
-              xrImmersiveRefSpace = xrImmersiveRefSpace.getOffsetReferenceSpace(evt.transform);
-            }
-          });
         } else {
           xrInlineRefSpace = refSpace;
         }
