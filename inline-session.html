@@ -104,7 +104,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     let xrInlineRefSpace = null;
 
     let arButton = null;  // >>> Added AR button variable
-    let isARAvailable = false;  // >>> Added AR availability flag
+    let arStarted = false;  // >>> Added AR availability flag
 
     // WebGL scene globals.
     let gl = null;
@@ -125,12 +125,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       // >>> Add a line break between the buttons
       const lineBreak = document.createElement('br');
       document.querySelector('header').appendChild(lineBreak);
+      const lineBreak2 = document.createElement('br');
+      document.querySelector('header').appendChild(lineBreak2);
 
-      // >>> Create AR button using WebARButton
+      // >>> Create AR button using WebXRButton
       arButton = new WebARButton({
-        cssClass: xrButton.domElement.className,
-        vrButton: xrButton.domElement,
-        onRequestSession: onRequestARSession
+        onRequestSession: onRequestARSession,
+        onEndSession: onEndSession,
+        textEnterARTitle: "START AR",
+        textARNotFoundTitle: "AR NOT FOUND",
+        textExitARTitle: "EXIT AR"
       });
       document.querySelector('header').appendChild(arButton.domElement);  // >>> Append AR button to header
 
@@ -143,8 +147,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // Start up an inline session, which should always be supported on
         // browsers that support WebXR regardless of the available hardware.
         navigator.xr.isSessionSupported('immersive-ar').then((supported) => {  // >>> Check for AR support
-          isARAvailable = supported;  // >>> Set AR availability flag
-          arButton.disabled = !supported;  // >>> Enable AR button if supported
+          arButton.enabled = supported;  // >>> Enable AR button if supported
         });
         navigator.xr.requestSession('inline').then(onSessionStarted);
       }
@@ -160,8 +163,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     function onRequestARSession() {  // >>> Added AR session request function
       return navigator.xr.requestSession('immersive-ar').then((session) => {
-        arButton.disabled = true;  // >>> Disable AR button when session starts
+        xrButtonNeu.setSession(session);
         session.isImmersive = true;  // >>> Mark session as immersive
+        arStarted = true;  // >>> Set AR started flag
         onSessionStarted(session);
       });
     }
@@ -214,9 +218,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // which XRReferenceSpace is associated with which XRSession.
         if (session.isImmersive) {
           xrImmersiveRefSpace = refSpace;
-          if (session.mode === 'immersive-ar') {  // >>> Check if session is AR
+          if (arStarted) {  // >>> Check if session is AR
             skybox.visible = false;  // >>> Hide skybox in AR mode
           }
+
+          // >>> Add event listener for reset
+          xrImmersiveRefSpace.addEventListener('reset', (evt) => {
+            if (evt.transform) {
+              // AR experiences typically should stay grounded to the real world.
+              // If there's a known origin shift, compensate for it here.
+              xrImmersiveRefSpace = xrImmersiveRefSpace.getOffsetReferenceSpace(evt.transform);
+            }
+          });
         } else {
           xrInlineRefSpace = refSpace;
         }
@@ -231,9 +244,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     function onSessionEnded(event) {
       // Only reset the button when the immersive session ends.
       if (event.session.isImmersive) {
-        xrButton.setSession(null);
-        if (event.session.mode === 'immersive-ar') {  // >>> Check if session was AR
-          arButton.disabled = false;  // >>> Re-enable AR button
+        arButton.setSession(null);
+        if (arStarted) {  // >>> Check if session was AR
+          arButton.setSession(null);
+          arStarted = false;  // >>> Reset AR started flag
           skybox.visible = true;  // >>> Show skybox when exiting AR mode
         }
       }
