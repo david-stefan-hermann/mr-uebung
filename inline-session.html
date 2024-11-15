@@ -52,7 +52,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   </header>
   <script type="module">
     import { WebXRButton } from './js/util/webxr-button.js';
-    import { WebARButton } from './js/util/webar-button.js';  // >>> Import WebARButton
     import { Scene } from './js/render/scenes/scene.js';
     import { Renderer, createWebGLContext } from './js/render/core/renderer.js';
     import { Gltf2Node } from './js/render/nodes/gltf2.js';
@@ -132,7 +131,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       document.querySelector('header').appendChild(lineBreak2);
 
       // >>> Create AR button using WebXRButton
-      arButton = new WebARButton({
+      arButton = new WebXRButton({
         onRequestSession: onRequestARSession,
         onEndSession: onEndSession,
         textEnterARTitle: "START AR",
