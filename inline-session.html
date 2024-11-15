@@ -144,11 +144,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           xrButton.enabled = supported;
         });
 
-        // Start up an inline session, which should always be supported on
-        // browsers that support WebXR regardless of the available hardware.
         navigator.xr.isSessionSupported('immersive-ar').then((supported) => {  // >>> Check for AR support
           arButton.enabled = supported;  // >>> Enable AR button if supported
         });
+
+        // Start up an inline session, which should always be supported on
+        // browsers that support WebXR regardless of the available hardware.
+
         navigator.xr.requestSession('inline').then(onSessionStarted);
       }
     }
@@ -163,7 +165,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     function onRequestARSession() {  // >>> Added AR session request function
       return navigator.xr.requestSession('immersive-ar').then((session) => {
-        xrButtonNeu.setSession(session);
+        arButton.setSession(session);
         session.isImmersive = true;  // >>> Mark session as immersive
         arStarted = true;  // >>> Set AR started flag
         onSessionStarted(session);
